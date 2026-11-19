@@ -1,0 +1,1103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>YouPay — whether you want to or not</title>
+<style>
+  *{ box-sizing: border-box; }
+  html, body {
+    height: 100%; margin: 0; overflow: hidden;
+    background: #06060a;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    color: #fff;
+  }
+  body { display: grid; place-items: center; }
+
+  #stage {
+    position: relative;
+    width: 900px; height: 560px;
+    transform-origin: center center;
+    background: #0d0d12;
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: 0 30px 120px rgba(0,0,0,.9), 0 0 0 1px #1b1b25;
+  }
+  #stage::after {   /* soft vignette for depth */
+    content:''; position:absolute; inset:0; pointer-events:none;
+    background: radial-gradient(ellipse at 50% 45%, transparent 55%, rgba(0,0,0,.28) 100%);
+    z-index: 20;
+  }
+
+  /* ---------- Scene machinery ---------- */
+  .scene {
+    position: absolute; inset: 0;
+    opacity: 0; visibility: hidden;
+    transition: opacity .38s ease, visibility .38s;
+  }
+  .scene.active { opacity: 1; visibility: visible; }
+
+  /* ---------- Generic person ---------- */
+  .person {
+    position: absolute;
+    width: 100px; height: 200px;
+    --shirt: #4f7cff;
+    --pants: #2b3245;
+    --skin: #f2c9a2;
+    --hair: #2b2118;
+  }
+  .person > div { position: absolute; }
+  .person .head {
+    left: 25px; top: 0; width: 50px; height: 50px;
+    border-radius: 50%; background: var(--skin); z-index: 3;
+    box-shadow: inset -6px -8px 10px rgba(190,140,100,.28);
+  }
+  .person .head::before {
+    content: ''; position: absolute; left: -3px; top: -5px;
+    width: 56px; height: 27px; background: var(--hair);
+    border-radius: 28px 28px 2px 2px;
+  }
+  .person .head::after {
+    content: ''; position: absolute; left: 12px; top: 25px;
+    width: 7px; height: 7px; border-radius: 50%; background: #23232b;
+    box-shadow: 20px 0 0 #23232b;
+  }
+  .person .torso {
+    left: 15px; top: 46px; width: 70px; height: 92px;
+    border-radius: 24px 24px 12px 12px; background: var(--shirt); z-index: 2;
+    box-shadow: inset -10px 0 16px rgba(0,0,0,.18), inset 8px 0 14px rgba(255,255,255,.14);
+  }
+  .person .leg {
+    top: 132px; width: 22px; height: 64px;
+    border-radius: 8px; background: var(--pants); z-index: 1;
+    box-shadow: inset -6px 0 8px rgba(0,0,0,.28);
+  }
+  .person .leg.l { left: 24px; }
+  .person .leg.r { left: 54px; }
+  .person .arm {
+    top: 52px; width: 16px; height: 90px;
+    border-radius: 9px; background: var(--shirt); z-index: 1;
+    transform-origin: top center;
+    transition: transform .9s cubic-bezier(.34,1.3,.64,1);
+    box-shadow: inset -5px 0 7px rgba(0,0,0,.2);
+  }
+  .person .arm.left  { left: 2px; }
+  .person .arm.right { right: 2px; }
+
+  .shadow {
+    position: absolute; border-radius: 50%;
+    background: radial-gradient(ellipse at center, rgba(20,30,45,.32), rgba(20,30,45,0) 72%);
+  }
+
+  /* ---------- Speech bubbles ---------- */
+  .bubble {
+    position: absolute;
+    max-width: 320px;
+    background: #fff; color: #14141a;
+    padding: 14px 18px;
+    border-radius: 18px;
+    font-size: 17px; font-weight: 600; line-height: 1.35;
+    box-shadow: 0 14px 40px rgba(0,0,0,.55);
+    opacity: 0; transform: translateY(12px) scale(.9);
+    transform-origin: bottom left;
+    transition: opacity .3s ease, transform .3s cubic-bezier(.2,1.5,.5,1);
+    z-index: 10;
+  }
+  .bubble.show { opacity: 1; transform: none; }
+  .bubble::after {
+    content: ''; position: absolute; bottom: -12px; left: 28px;
+    border: 12px solid transparent; border-top-color: #fff; border-bottom: 0;
+  }
+  .bubble.tail-right { transform-origin: bottom right; }
+  .bubble.tail-right::after { left: auto; right: 28px; }
+
+  /* ---------- Scene 1 : intro ---------- */
+  #s1 { display: grid; place-items: center; background: radial-gradient(circle at 50% 45%, #16161f, #08080c 70%); }
+  .intro-text {
+    margin: 0; padding: 0 60px;
+    font-size: 34px; font-weight: 800; line-height: 1.35; text-align: center;
+    letter-spacing: -.5px;
+    opacity: 0; transform: translateY(14px);
+    transition: opacity .9s ease, transform .9s ease;
+  }
+  .intro-text.show { opacity: 1; transform: none; }
+  .intro-text::after {
+    content: ''; display: inline-block; width: 12px; height: 34px;
+    background: #ff3b3b; margin-left: 10px; vertical-align: -4px;
+    animation: blink 1s steps(1) infinite;
+  }
+  @keyframes blink { 50% { opacity: 0; } }
+
+  /* ---------- Scene 2 : scrolling ---------- */
+  #s2 { background: linear-gradient(160deg, #14141d, #0b0b11); }
+  .phone {
+    position: absolute; left: 440px; top: 60px;
+    width: 290px; height: 450px;
+    background: #101014; border-radius: 38px; padding: 10px;
+    box-shadow: 0 24px 70px rgba(0,0,0,.75), inset 0 0 0 2px #2a2a33;
+  }
+  .screen {
+    position: relative; width: 100%; height: 100%;
+    background: #fff; border-radius: 30px; overflow: hidden;
+  }
+  .feed { position: absolute; top: 0; left: 0; right: 0; padding: 10px; will-change: transform; }
+  .feed.scrolling { animation: scrollFeed 3.2s cubic-bezier(.35,.02,.2,1) forwards; }
+  @keyframes scrollFeed { from { transform: translateY(0); } to { transform: translateY(-290px); } }
+
+  .post {
+    height: 90px; margin-bottom: 10px;
+    background: #f1f3f8; border-radius: 14px;
+    display: flex; align-items: center; gap: 12px; padding: 14px;
+  }
+  .post .av { width: 42px; height: 42px; border-radius: 50%; background: #c8d2e4; flex: 0 0 auto; }
+  .post .plines { flex: 1; display: grid; gap: 9px; }
+  .post .plines i { display: block; height: 9px; border-radius: 5px; background: #d2dae8; }
+
+  .adcard {
+    height: 190px; margin-bottom: 10px; padding: 14px;
+    background: #fff; border-radius: 16px;
+    border: 2px solid #e2e8f2;
+    box-shadow: 0 0 0 4px rgba(79,124,255,.22);
+    position: relative;
+    animation: adPulse 1.8s ease-in-out infinite;
+  }
+  @keyframes adPulse {
+    0%,100% { box-shadow: 0 0 0 4px rgba(79,124,255,.18); }
+    50%     { box-shadow: 0 0 0 9px rgba(79,124,255,.05); }
+  }
+  .adtag {
+    position: absolute; top: 10px; right: 12px;
+    font-size: 10px; font-weight: 800; letter-spacing: 1px;
+    color: #6b7280; text-transform: uppercase;
+    background: #eef1f7; padding: 3px 7px; border-radius: 6px;
+  }
+  .adrow { display: flex; align-items: center; gap: 10px; }
+  .adlogo {
+    width: 40px; height: 40px; border-radius: 10px;
+    background: linear-gradient(135deg,#2f6bd8,#4f9cff); color: #fff;
+    display: grid; place-items: center; font-weight: 900; font-size: 20px;
+  }
+  .adbrand { color: #14203a; font-weight: 900; font-size: 16px; letter-spacing: .5px; }
+  .adsub { color: #8b93a7; font-size: 11px; font-weight: 600; }
+  .adbody { margin-top: 14px; font-size: 22px; font-weight: 800; color: #14203a; }
+  .adcta {
+    margin-top: 10px; display: inline-block;
+    background: #2f6bd8; color: #fff; font-size: 12px; font-weight: 800;
+    padding: 7px 14px; border-radius: 8px; letter-spacing: .5px;
+  }
+
+  /* =========================================================
+     REALISTIC MILK BOTTLE  (shared by scenes 3 & 4)
+     ========================================================= */
+  .bottle {
+    position: absolute;
+    width: 64px; height: 152px;
+    filter: drop-shadow(0 18px 14px rgba(20,45,80,.28));
+  }
+  .bottle .cap {
+    position: absolute; left: 21px; top: 0; width: 22px; height: 16px;
+    border-radius: 5px 5px 3px 3px;
+    background:
+      repeating-linear-gradient(90deg, rgba(255,255,255,.28) 0 2px, rgba(255,255,255,0) 2px 4px),
+      linear-gradient(180deg, #79a8ec 0%, #3a6fd0 45%, #22499c 100%);
+    box-shadow: inset 0 2px 2px rgba(255,255,255,.45), 0 1px 2px rgba(0,0,0,.25);
+  }
+  .bottle .neck {
+    position: absolute; left: 23px; top: 14px; width: 18px; height: 16px;
+    background: linear-gradient(90deg, #b5cbe6 0%, #ffffff 45%, #c2d6ec 100%);
+  }
+  .bottle .body {
+    position: absolute; left: 2px; top: 26px; width: 60px; height: 126px;
+    border-radius: 26px 26px 10px 10px / 30px 30px 10px 10px;
+    background: linear-gradient(100deg,
+      #b3c9e2 0%, #e6f1ff 10%, #ffffff 24%, #e8f2fd 42%,
+      #c7dbf0 60%, #f6faff 76%, #cbdcee 90%, #aec5de 100%);
+    box-shadow:
+      inset -9px 0 16px rgba(110,145,190,.38),
+      inset 9px 0 12px rgba(255,255,255,.8),
+      inset 0 -16px 20px rgba(130,165,205,.3),
+      inset 0 6px 10px rgba(255,255,255,.65);
+  }
+  .bottle .body::before {            /* vertical shine */
+    content: ''; position: absolute; left: 9px; top: 30px;
+    width: 7px; height: 74px; border-radius: 6px;
+    background: linear-gradient(rgba(255,255,255,.95), rgba(255,255,255,0));
+  }
+  .bottle .body::after {             /* label */
+    content: 'MILK';
+    position: absolute; left: 3px; right: 3px; top: 60px; height: 48px;
+    border-radius: 4px;
+    background: linear-gradient(#ffffff 0 66%, #2f6bd8 66% 100%);
+    box-shadow: 0 1px 3px rgba(20,40,70,.18), inset 0 0 0 1px rgba(180,200,225,.6);
+    display: grid; place-items: center;
+    padding-bottom: 17px;
+    font: 900 13px/1 "Helvetica Neue", Arial, sans-serif;
+    letter-spacing: 1.6px; color: #1f4fa8;
+  }
+
+  /* ---------- Scene 3 : supermarket aisle ---------- */
+  #s3 { background: linear-gradient(#f8fbfe 0%, #eaf1f9 32%, #dfe8f2 100%); }
+
+  .s3-ceiling {
+    position: absolute; left: 0; right: 0; top: 0; height: 56px;
+    background: linear-gradient(#ffffff, #e7edf6);
+    border-bottom: 2px solid #cbd5e2;
+    box-shadow: 0 8px 22px rgba(120,140,170,.18);
+  }
+  .s3-lights i {
+    position: absolute; top: 13px; height: 9px; width: 168px;
+    border-radius: 5px; background: #ffffff;
+    box-shadow: 0 8px 30px 12px rgba(255,255,255,.95);
+  }
+  .s3-lights i:nth-child(1){ left: 40px; }
+  .s3-lights i:nth-child(2){ left: 288px; }
+  .s3-lights i:nth-child(3){ left: 536px; }
+
+  .s3-wall {
+    position: absolute; left: 0; right: 0; top: 56px; height: 340px;
+    background: linear-gradient(#eef4fb, #dde6f1);
+  }
+
+  .s3-shelves { position: absolute; inset: 0; }
+  .shelfrow {
+    position: absolute; left: -30px; right: -30px; height: 78px;
+  }
+  .shelfrow::before {   /* products */
+    content: ''; position: absolute; left: 0; right: 0; top: 6px; bottom: 10px;
+    background-image:
+      linear-gradient(180deg, rgba(255,255,255,.45) 0%, rgba(255,255,255,0) 28%, rgba(0,0,0,.14) 100%),
+      repeating-linear-gradient(90deg,
+        #c8524f 0 26px, transparent 26px 34px,
+        #d9a33c 34px 66px, transparent 66px 74px,
+        #4a7cbb 74px 104px, transparent 104px 112px,
+        #5aa06c 112px 142px, transparent 142px 150px,
+        #8f6fb5 150px 178px, transparent 178px 186px,
+        #c8524f 186px 212px, transparent 212px 220px,
+        #d9a33c 220px 252px, transparent 252px 260px,
+        #4a7cbb 260px 290px, transparent 290px 298px,
+        #5aa06c 298px 328px, transparent 328px 336px);
+    background-size: 100% 100%, 336px 100%;
+    border-radius: 2px 2px 0 0;
+    opacity: .92;
+  }
+  .shelfrow::after {    /* shelf board + price rail */
+    content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 11px;
+    background: linear-gradient(#f2f5f9 0%, #cdd6e2 45%, #98a4b5 100%);
+    box-shadow: 0 7px 12px rgba(40,60,90,.2);
+    border-radius: 2px;
+  }
+
+  .s3-chiller {
+    position: absolute; left: 636px; top: 62px; width: 252px; height: 362px;
+    border-radius: 10px;
+    background: linear-gradient(#f6fbff, #dcecf9 45%, #c5ddf3);
+    box-shadow:
+      inset 0 0 0 7px #e6eef8,
+      inset 0 0 0 10px #becbdb,
+      0 20px 44px rgba(30,60,95,.22);
+    overflow: hidden;
+  }
+  .chiller-doors {
+    position: absolute; inset: 13px;
+    background-image:
+      repeating-linear-gradient(90deg, #ffffff 0 20px, #edf4fc 20px 25px, transparent 25px 42px),
+      repeating-linear-gradient(180deg, transparent 0 74px, #c3d3e4 74px 79px),
+      linear-gradient(#f9fcff, #e2edf9);
+    background-size: 42px 76px, 100% 100%, 100% 100%;
+    background-repeat: repeat, repeat-y, no-repeat;
+  }
+  .chiller-glass {
+    position: absolute; inset: 13px; pointer-events: none;
+    background: linear-gradient(115deg,
+      rgba(255,255,255,.72) 0 13%,
+      rgba(255,255,255,0) 13% 33%,
+      rgba(255,255,255,.4) 33% 38%,
+      rgba(255,255,255,0) 38% 100%);
+  }
+
+  .s3-floor {
+    position: absolute; left: 0; right: 0; bottom: 0; height: 134px;
+    background:
+      repeating-linear-gradient(90deg, rgba(150,168,190,.22) 0 1px, transparent 1px 92px),
+      linear-gradient(#e2e9f2, #c6d1de);
+    border-top: 2px solid #b7c2d1;
+    box-shadow: inset 0 12px 22px rgba(120,140,170,.16);
+  }
+
+  /* price sticker */
+  .pricetag {
+    position: absolute;
+    padding: 10px 22px 12px;
+    background: linear-gradient(#ffffff, #f4f6f9);
+    border: 4px solid #d81f26; border-radius: 10px;
+    color: #d81f26; font-weight: 900; font-size: 44px; line-height: 1;
+    letter-spacing: -1px;
+    box-shadow: 0 18px 34px rgba(20,30,50,.28), inset 0 0 0 3px #fff;
+    transform: rotate(-8deg) scale(.2); opacity: 0;
+    z-index: 6;
+  }
+  .pricetag small {
+    display: block; margin-top: 5px;
+    font-size: 10px; letter-spacing: 1.8px; color: #8a9099; font-weight: 800;
+  }
+  .pricetag.show { animation: popIn .55s cubic-bezier(.2,1.6,.5,1) forwards; }
+  @keyframes popIn {
+    0%   { opacity: 0; transform: rotate(-8deg) scale(.2); }
+    70%  { opacity: 1; transform: rotate(-8deg) scale(1.12); }
+    100% { opacity: 1; transform: rotate(-8deg) scale(1); }
+  }
+
+  /* ---------- Scene 4 : checkout ---------- */
+  #s4 { background: linear-gradient(#eef3fa, #dbe4ef); }
+
+  .s4-wall {
+    position: absolute; inset: 0;
+    background:
+      repeating-linear-gradient(90deg, rgba(255,255,255,.55) 0 130px, rgba(255,255,255,0) 130px 260px),
+      linear-gradient(180deg, #e9eff8, #d6dfeb);
+  }
+  .s4-bg {   /* blurred aisle behind */
+    position: absolute; left: 0; right: 0; top: 58px; height: 250px;
+    background-image:
+      repeating-linear-gradient(90deg,
+        #b9c8dc 0 30px, #9fb2ca 30px 46px,
+        #c9b6a4 46px 84px, #a9968a 84px 100px,
+        #a9c4b3 100px 136px, #94b3a1 136px 152px);
+    filter: blur(7px);
+    opacity: .55;
+  }
+  .s4-lights i {
+    position: absolute; top: 8px; height: 10px; width: 130px;
+    border-radius: 5px; background: #fff;
+    box-shadow: 0 10px 34px 14px rgba(255,255,255,.95);
+    opacity: .95;
+  }
+  .s4-lights i:nth-child(1){ left: 50px; }
+  .s4-lights i:nth-child(2){ left: 300px; }
+  .s4-lights i:nth-child(3){ left: 550px; }
+  .s4-lights i:nth-child(4){ left: 780px; }
+
+  /* the counter */
+  .counter {
+    position: absolute; left: 0; right: 0; top: 352px; bottom: 0;
+    z-index: 3;
+  }
+  .counter .belt {           /* conveyor belt */
+    position: absolute; left: 0; top: 0; width: 60%; height: 32px;
+    background: repeating-linear-gradient(90deg, #4b515e 0 16px, #3a3f4a 16px 32px);
+    border-top: 5px solid #79828f;
+    box-shadow: inset 0 -8px 12px rgba(0,0,0,.5), inset 0 6px 10px rgba(255,255,255,.12);
+  }
+  .counter .belt-rail {
+    position: absolute; left: 0; top: -6px; width: 60%; height: 8px;
+    border-radius: 4px;
+    background: linear-gradient(#c7d0dc, #8b95a5);
+  }
+  .counter .top-right {      /* cashier side counter top */
+    position: absolute; right: 0; top: 0; width: 40%; height: 32px;
+    background: linear-gradient(#dbe2eb, #a8b2c1 70%, #8d97a7);
+    border-top: 5px solid #eef2f8;
+    box-shadow: inset 0 -8px 12px rgba(0,0,0,.16);
+  }
+  .counter .face {           /* front panel of the counter */
+    position: absolute; left: 0; right: 0; top: 32px; bottom: 0;
+    background: linear-gradient(#dbe2ec 0%, #b9c3d1 22%, #939eaf 68%, #6f7987 100%);
+    box-shadow:
+      inset 0 8px 14px rgba(0,0,0,.13),
+      inset 0 -40px 60px rgba(0,0,0,.14);
+  }
+  .counter .face::after {    /* kick plate */
+    content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 26px;
+    background: linear-gradient(#5c6572, #474e59);
+    box-shadow: inset 0 3px 6px rgba(0,0,0,.35);
+  }
+
+  /* register / till */
+  .register {
+    position: absolute; left: 556px; top: 234px; width: 126px; height: 118px;
+    z-index: 5;
+  }
+  .reg-body {
+    position: absolute; left: 0; right: 0; bottom: 0; height: 52px;
+    border-radius: 8px 8px 3px 3px;
+    background: linear-gradient(180deg, #5f6878 0%, #3d4553 58%, #262c37 100%);
+    box-shadow: 0 10px 18px rgba(0,0,0,.38), inset 0 2px 0 rgba(255,255,255,.2);
+  }
+  .reg-body::after {
+    content: ''; position: absolute; left: 11px; right: 11px; bottom: 9px; height: 15px;
+    border-radius: 3px;
+    background: repeating-linear-gradient(90deg, #949dad 0 10px, #6d7583 10px 13px);
+    opacity: .75;
+  }
+  .reg-screen {
+    position: absolute; left: 15px; top: 0; width: 96px; height: 72px;
+    border-radius: 6px; border: 3px solid #4c5464;
+    background: linear-gradient(160deg, #2b313d, #10141b);
+    box-shadow: 0 12px 20px rgba(0,0,0,.38), inset 0 0 22px rgba(120,240,160,.1);
+    display: grid; place-items: center;
+    color: #7ef29c; font-family: "Courier New", monospace; font-weight: 700;
+    font-size: 19px; letter-spacing: 1px;
+    text-shadow: 0 0 10px rgba(126,242,156,.8);
+  }
+  .reg-light {
+    position: absolute; right: 6px; bottom: 56px; width: 8px; height: 8px;
+    border-radius: 50%; background: #48e07a;
+    box-shadow: 0 0 10px 2px rgba(72,224,122,.8);
+  }
+
+  /* card reader */
+  .cardreader {
+    position: absolute; left: 452px; top: 296px; width: 64px; height: 56px;
+    border-radius: 9px 9px 4px 4px;
+    background: linear-gradient(160deg, #454d5b 0%, #232934 60%, #161a22 100%);
+    box-shadow: 0 12px 20px rgba(0,0,0,.32), inset 0 2px 0 rgba(255,255,255,.18);
+    transform: rotate(-6deg);
+    z-index: 5;
+  }
+  .cardreader::before {
+    content: ''; position: absolute; left: 8px; top: 8px; width: 48px; height: 26px;
+    border-radius: 4px;
+    background: linear-gradient(#22303f, #16212b);
+    box-shadow: inset 0 0 0 1px #446075;
+  }
+  .cardreader::after {
+    content: ''; position: absolute; left: 50%; transform: translateX(-50%);
+    bottom: 9px; width: 34px; height: 8px; border-radius: 2px;
+    background: repeating-linear-gradient(90deg, #67717f 0 3px, #3d4450 3px 6px);
+  }
+  .cardreader i {
+    position: absolute; right: 8px; top: 10px; width: 6px; height: 6px;
+    border-radius: 50%; background: #48e07a;
+    box-shadow: 0 0 8px 2px rgba(72,224,122,.9);
+  }
+
+  /* ---------- Scene 5 : rewind ---------- */
+  #s5 { background: #050508; display: grid; place-items: center; }
+  .rewind-lines {
+    position: absolute; inset: -50%;
+    background: repeating-linear-gradient(
+      to bottom,
+      rgba(255,255,255,.05) 0 2px,
+      transparent 2px 7px
+    );
+    animation: roll 0.25s linear infinite;
+  }
+  @keyframes roll { to { transform: translateY(7px); } }
+  .rewind-text, .rewind-sub {
+    position: absolute; left: 0; right: 0; text-align: center;
+    font-weight: 900; letter-spacing: 2px;
+    opacity: 0; transition: opacity .18s;
+  }
+  .rewind-text { font-size: 46px; color: #fff; }
+  .rewind-text.show { opacity: 1; animation: flick .12s steps(1) infinite; }
+  @keyframes flick { 50% { opacity: .45; } }
+  .rewind-sub {
+    font-size: 56px; color: #ffd23f; text-transform: uppercase;
+    text-shadow: 0 0 34px rgba(255,210,63,.45);
+  }
+  .rewind-sub.show { opacity: 1; }
+
+  /* ---------- Scene 6 : office ---------- */
+  #s6 { background: linear-gradient(170deg, #1a2030, #0e121b); }
+  .office-wall {
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(90deg, rgba(255,255,255,.03) 1px, transparent 1px),
+      linear-gradient(rgba(255,255,255,.03) 1px, transparent 1px);
+    background-size: 46px 46px;
+  }
+  .desk {
+    position: absolute; left: 0; right: 0; bottom: 0; height: 92px;
+    background: linear-gradient(#3b3327, #241f18);
+    border-top: 8px solid #5b4c37;
+  }
+  .nametag {
+    position: absolute; font-size: 12px; letter-spacing: 1.6px;
+    text-transform: uppercase; color: #7f8aa3; font-weight: 700;
+  }
+  #boss, #social { transition: transform .95s cubic-bezier(.34,1.25,.64,1); }
+  #boss.shake { transform: translateX(120px); }
+  #social.shake { transform: translateX(-120px); }
+  #boss.shake .arm.right { transform: rotate(-80deg); }
+  #social.shake .arm.left { transform: rotate(80deg); }
+
+  .b-long { font-size: 15px; line-height: 1.4; }
+
+  /* ---------- Scene 7 : YouPay ---------- */
+  #s7 {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 14px; background: radial-gradient(circle at 50% 40%, #1a0a0a, #08080c 72%);
+    padding: 40px 0;
+  }
+  .youpay {
+    display: flex; align-items: center; gap: 24px;
+    opacity: 0; transform: scale(.75);
+    transition: opacity .7s ease, transform .7s cubic-bezier(.2,1.5,.5,1);
+  }
+  .youpay.show { opacity: 1; transform: scale(1); }
+  .yp-logo {
+    width: 152px; height: 106px; background: #e60000;
+    border-radius: 30px; display: grid; place-items: center;
+    box-shadow: 0 0 70px rgba(255,30,30,.45);
+  }
+  .yp-play {
+    width: 0; height: 0; margin-left: 13px;
+    border-left: 44px solid #fff;
+    border-top: 28px solid transparent;
+    border-bottom: 28px solid transparent;
+  }
+  .yp-name { font-size: 80px; font-weight: 900; letter-spacing: -3px; }
+  .yp-tag {
+    margin: 0; padding: 0 30px;
+    font-size: 25px; color: #aeb4c4; font-weight: 600; letter-spacing: .3px;
+    text-align: center; line-height: 1.35;
+    opacity: 0; transition: opacity .8s ease;
+  }
+  .yp-tag.show { opacity: 1; }
+  .yp-cta {
+    margin: 16px 0 0; padding: 0 50px;
+    font-size: 17px; color: #7d8496; text-align: center; line-height: 1.5;
+    opacity: 0; transition: opacity .8s ease;
+  }
+  .yp-cta.show { opacity: 1; }
+  .yp-cta b { color: #ff4d4d; }
+
+  /* ---------- Replay ---------- */
+  #replay {
+    position: absolute; left: 50%; bottom: 22px; transform: translateX(-50%) translateY(10px);
+    background: #23232e; color: #cdd3e0; border: 1px solid #3a3a4a;
+    padding: 10px 22px; border-radius: 999px;
+    font-size: 13px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+    cursor: pointer; opacity: 0; pointer-events: none;
+    transition: opacity .6s ease, transform .6s ease, background .2s;
+    z-index: 30;
+  }
+  #replay.show { opacity: 1; transform: translateX(-50%); pointer-events: auto; }
+  #replay:hover { background: #2e2e3c; }
+
+  /* ---------- Mute button ---------- */
+  #muteBtn {
+    position: absolute; top: 14px; right: 14px; z-index: 35;
+    width: 44px; height: 44px; border-radius: 50%;
+    background: #1c1c26; color: #cfd5e2; border: 1px solid #33333f;
+    font-size: 18px; cursor: pointer; display: none;
+    align-items: center; justify-content: center;
+    transition: background .2s, transform .15s;
+  }
+  #muteBtn.show { display: flex; }
+  #muteBtn:hover { background: #2a2a36; }
+  #muteBtn:active { transform: scale(.94); }
+
+  /* ---------- Start gate ---------- */
+  #startgate {
+    position: absolute; inset: 0; z-index: 40;
+    display: grid; place-items: center;
+    background: radial-gradient(circle at 50% 38%, #1c0a12, #06060a 72%);
+    transition: opacity .55s ease, visibility .55s;
+  }
+  #startgate.gone { opacity: 0; visibility: hidden; }
+  .sg-inner { text-align: center; display: grid; gap: 10px; place-items: center; }
+  .sg-logo {
+    width: 96px; height: 72px; background: #e60000; border-radius: 20px;
+    display: grid; place-items: center;
+    box-shadow: 0 0 60px rgba(255,30,30,.45);
+  }
+  .sg-logo .yp-play {
+    border-left-width: 34px; border-top-width: 21px; border-bottom-width: 21px;
+    margin-left: 9px;
+  }
+  .sg-inner h1 { margin: 0; font-size: 58px; letter-spacing: -2.5px; font-weight: 900; }
+  .sg-inner p {
+    margin: 0; color: #9aa1b2; font-size: 16px; max-width: 420px; line-height: 1.45;
+  }
+  #startBtn {
+    margin-top: 12px; background: #e60000; color: #fff; border: 0;
+    padding: 15px 36px; border-radius: 999px;
+    font-size: 16px; font-weight: 800; letter-spacing: .5px; cursor: pointer;
+    box-shadow: 0 12px 40px rgba(230,0,0,.4);
+    transition: transform .15s, box-shadow .15s;
+  }
+  #startBtn:hover { transform: translateY(-2px); box-shadow: 0 18px 50px rgba(230,0,0,.55); }
+  #startBtn:active { transform: translateY(0); }
+  .sg-inner small { color: #5f6675; font-size: 12px; letter-spacing: .6px; }
+</style>
+</head>
+<body>
+<div id="stage">
+
+  <!-- ============ SCENE 1 ============ -->
+  <div class="scene" id="s1">
+    <p class="intro-text" id="intro">You think you don&rsquo;t pay for social media, but&hellip;</p>
+  </div>
+
+  <!-- ============ SCENE 2 ============ -->
+  <div class="scene" id="s2">
+    <div class="person" style="left:150px; top:180px; --shirt:#4f7cff; --pants:#2b3245;">
+      <div class="arm left"></div>
+      <div class="arm right"></div>
+      <div class="leg l"></div>
+      <div class="leg r"></div>
+      <div class="torso"></div>
+      <div class="head"></div>
+    </div>
+
+    <div class="phone">
+      <div class="screen">
+        <div class="feed" id="feed">
+          <div class="post"><div class="av"></div><div class="plines"><i style="width:72%"></i><i style="width:44%"></i></div></div>
+          <div class="post"><div class="av"></div><div class="plines"><i style="width:60%"></i><i style="width:80%"></i></div></div>
+          <div class="post"><div class="av"></div><div class="plines"><i style="width:82%"></i><i style="width:36%"></i></div></div>
+          <div class="post"><div class="av"></div><div class="plines"><i style="width:52%"></i><i style="width:68%"></i></div></div>
+          <div class="post"><div class="av"></div><div class="plines"><i style="width:76%"></i><i style="width:40%"></i></div></div>
+
+          <div class="adcard">
+            <div class="adtag">Ad</div>
+            <div class="adrow">
+              <div class="adlogo">M</div>
+              <div>
+                <div class="adbrand">MEGA-MART</div>
+                <div class="adsub">Sponsored</div>
+              </div>
+            </div>
+            <div class="adbody">Fresh milk — now in store!</div>
+            <div class="adcta">Shop now</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="bubble" id="b2" style="left:120px; top:50px;">Oh yeah, we&rsquo;re out of milk!</div>
+  </div>
+
+  <!-- ============ SCENE 3 : supermarket aisle ============ -->
+  <div class="scene" id="s3">
+    <div class="s3-ceiling"></div>
+    <div class="s3-lights"><i></i><i></i><i></i></div>
+    <div class="s3-wall"></div>
+
+    <div class="s3-shelves">
+      <div class="shelfrow" style="top:64px"></div>
+      <div class="shelfrow" style="top:152px"></div>
+      <div class="shelfrow" style="top:240px"></div>
+      <div class="shelfrow" style="top:328px"></div>
+    </div>
+
+    <div class="s3-chiller">
+      <div class="chiller-doors"></div>
+      <div class="chiller-glass"></div>
+    </div>
+
+    <div class="s3-floor"></div>
+
+    <div class="shadow" style="left:176px; top:414px; width:160px; height:28px;"></div>
+
+    <div class="person" style="left:200px; top:232px; --shirt:#4f7cff; --pants:#2b3245;">
+      <div class="arm left"></div>
+      <div class="arm right" style="transform: rotate(-34deg);"></div>
+      <div class="leg l"></div>
+      <div class="leg r"></div>
+      <div class="torso"></div>
+      <div class="head"></div>
+    </div>
+
+    <div class="bottle" style="left:306px; top:268px;">
+      <div class="cap"></div>
+      <div class="neck"></div>
+      <div class="body"></div>
+    </div>
+
+    <div class="pricetag" id="tag50" style="left:392px; top:232px;">&pound;50<small>PER BOTTLE</small></div>
+  </div>
+
+  <!-- ============ SCENE 4 : checkout ============ -->
+  <div class="scene" id="s4">
+    <div class="s4-wall"></div>
+    <div class="s4-bg"></div>
+    <div class="s4-lights"><i></i><i></i><i></i><i></i></div>
+
+    <!-- customer (left of counter) -->
+    <div class="person" style="left:150px; top:214px; --shirt:#4f7cff; --pants:#2b3245;">
+      <div class="arm left"></div>
+      <div class="arm right" style="transform: rotate(-40deg);"></div>
+      <div class="leg l"></div>
+      <div class="leg r"></div>
+      <div class="torso"></div>
+      <div class="head"></div>
+    </div>
+
+    <!-- cashier (right, behind the till) -->
+    <div class="person" style="left:742px; top:210px; --shirt:#e0574f; --pants:#2b3245; --hair:#4a2f1d;">
+      <div class="arm left" style="transform: rotate(72deg);"></div>
+      <div class="arm right"></div>
+      <div class="leg l"></div>
+      <div class="leg r"></div>
+      <div class="torso"></div>
+      <div class="head"></div>
+    </div>
+
+    <!-- counter / belt -->
+    <div class="counter">
+      <div class="face"></div>
+      <div class="belt"></div>
+      <div class="belt-rail"></div>
+      <div class="top-right"></div>
+    </div>
+
+    <!-- till -->
+    <div class="register">
+      <div class="reg-screen">&pound;50.00</div>
+      <div class="reg-body"></div>
+      <div class="reg-light"></div>
+    </div>
+
+    <!-- card reader -->
+    <div class="cardreader"><i></i></div>
+
+    <!-- milk on the belt -->
+    <div class="bottle" style="left:300px; top:230px;">
+      <div class="cap"></div>
+      <div class="neck"></div>
+      <div class="body"></div>
+    </div>
+
+    <div class="bubble tail-right" id="b4" style="left:520px; top:62px; width:330px;">
+      That&rsquo;ll be 50 pounds please, cash or card?
+    </div>
+  </div>
+
+  <!-- ============ SCENE 5 : rewind ============ -->
+  <div class="scene" id="s5">
+    <div class="rewind-lines"></div>
+    <div class="rewind-text" id="rewindText">&#9664;&#9664; REWINDING</div>
+    <div class="rewind-sub" id="rewindSub">2 weeks earlier</div>
+  </div>
+
+  <!-- ============ SCENE 6 : office ============ -->
+  <div class="scene" id="s6">
+    <div class="office-wall"></div>
+    <div class="desk"></div>
+
+    <!-- supermarket boss -->
+    <div class="person" id="boss" style="left:170px; top:190px; --shirt:#2b3a55; --pants:#1c2434; --hair:#3a2a1c;">
+      <div class="arm left"></div>
+      <div class="arm right"></div>
+      <div class="leg l"></div>
+      <div class="leg r"></div>
+      <div class="torso"></div>
+      <div class="head"></div>
+    </div>
+
+    <!-- social media exec -->
+    <div class="person" id="social" style="left:630px; top:190px; --shirt:#8a3fd1; --pants:#2b2338; --hair:#1b1b22;">
+      <div class="arm left"></div>
+      <div class="arm right"></div>
+      <div class="leg l"></div>
+      <div class="leg r"></div>
+      <div class="torso"></div>
+      <div class="head"></div>
+    </div>
+
+    <div class="nametag" style="left:160px; top:404px;">Supermarket boss</div>
+    <div class="nametag" style="left:610px; top:404px;">Social media exec</div>
+
+    <div class="bubble b-long" id="b6a" style="left:480px; top:14px; width:370px;">
+      If you advertise on our app, the other supermarkets will close down, so you can set your prices as high as you want.
+    </div>
+    <div class="bubble" id="b6b" style="left:50px; top:34px; width:330px;">
+      But if we pay for your adverts, our customers will have to pay &pound;50 for a bottle of milk!
+    </div>
+    <div class="bubble" id="b6c" style="left:640px; top:84px; width:190px;">
+      Well, tough.
+    </div>
+    <div class="bubble" id="b6d" style="left:490px; top:26px; width:340px;">
+      That&rsquo;ll be &pound;10,000,000. Cash or card?
+    </div>
+  </div>
+
+  <!-- ============ SCENE 7 : YouPay ============ -->
+  <div class="scene" id="s7">
+    <div class="youpay" id="yp">
+      <div class="yp-logo"><div class="yp-play"></div></div>
+      <div class="yp-name">YouPay</div>
+    </div>
+    <p class="yp-tag" id="ypTag">whether you want to or not</p>
+    <p class="yp-cta" id="ypCta">
+      Find out how to stop paying for other people&rsquo;s ads at <b>youpay.fyi</b>
+    </p>
+    <button id="replay" onclick="location.reload()">Replay</button>
+  </div>
+
+  <!-- ============ MUTE TOGGLE ============ -->
+  <button id="muteBtn" title="Mute / unmute voiceover" aria-label="Mute or unmute">&#128266;</button>
+
+  <!-- ============ START GATE (needed so browsers allow speech) ============ -->
+  <div id="startgate">
+    <div class="sg-inner">
+      <div class="sg-logo"><div class="yp-play"></div></div>
+      <h1>YouPay</h1>
+      <p>An animated short about who really pays for &ldquo;free&rdquo;.</p>
+      <button id="startBtn">&#9654;&nbsp; Play with sound</button>
+      <small>&#128266; Voiceover on &mdash; each character has their own voice</small>
+    </div>
+  </div>
+
+</div>
+
+<script>
+(function () {
+  const stage = document.getElementById('stage');
+
+  /* ---- Responsive scaling ---- */
+  function fit() {
+    const s = Math.min(window.innerWidth / 900, window.innerHeight / 560);
+    stage.style.transform = 'scale(' + s + ')';
+  }
+  window.addEventListener('resize', fit);
+  fit();
+
+  /* =========================================================
+     TEXT-TO-SPEECH  —  each character gets a distinct pitch
+     ========================================================= */
+  const VOICE = {
+    narrator:  { pitch: 0.85, rate: 0.95 },  // calm storyteller
+    hero:      { pitch: 1.15, rate: 1.05 },  // the everyday scroller
+    cashier:   { pitch: 1.40, rate: 1.05 },  // bright, chirpy
+    boss:      { pitch: 0.55, rate: 0.92 },  // deep, heavy supermarket exec
+    social:    { pitch: 1.50, rate: 1.15 },  // slick, fast social-media exec
+    announcer: { pitch: 0.72, rate: 0.92 }   // movie-trailer voice for the outro
+  };
+
+  let muted = false;
+  const muteBtn = document.getElementById('muteBtn');
+
+  function pickVoice() {
+    if (!('speechSynthesis' in window)) return null;
+    const vs = speechSynthesis.getVoices().filter(v => /^en/i.test(v.lang));
+    if (!vs.length) return null;
+    // Prefer a British English voice for the "corporate" satire feel
+    return vs.find(v => /en[-_]GB/i.test(v.lang) && /female|male|Google|Daniel|Serena|Kate/i.test(v.name))
+        || vs.find(v => /en[-_]GB/i.test(v.lang))
+        || vs[0];
+  }
+
+  /* Speak a line; resolves when speech *really* finishes (or immediately if muted).
+     Uses three safety mechanisms so a line can never be clipped by the next one:
+       1. u.onend / u.onerror  (normal path)
+       2. a generous hard timeout (very slow voices / missing events)
+       3. a polling fallback on speechSynthesis.speaking
+     It also waits a beat after cancel() before speaking, because Chrome can drop
+     an utterance that is spoken immediately after cancel(). */
+  function speak(text, opts = {}) {
+    return new Promise(resolve => {
+      if (muted || !('speechSynthesis' in window) || !text) { resolve(); return; }
+
+      const u = new SpeechSynthesisUtterance(text);
+      u.pitch  = Math.min(2, Math.max(0, opts.pitch ?? 1));
+      u.rate   = Math.min(2, Math.max(0.1, opts.rate ?? 1));
+      u.volume = 1;
+      const v = pickVoice();
+      if (v) u.voice = v;
+
+      let done = false;
+      let capTimer = null;
+      let pollTimer = null;
+      let startedAt = 0;
+
+      const finish = () => {
+        if (done) return;
+        done = true;
+        if (capTimer)  clearTimeout(capTimer);
+        if (pollTimer) clearInterval(pollTimer);
+        resolve();
+      };
+
+      u.onend   = finish;
+      u.onerror = finish;
+
+      /* 2. Generous hard cap — far longer than any line could need */
+      capTimer = setTimeout(finish, Math.min(45000, Math.max(10000, text.length * 240 + 4000)));
+
+      /* Stop anything already playing */
+      try { speechSynthesis.cancel(); } catch (e) {}
+
+      /* 3. Settle, then speak + poll */
+      setTimeout(() => {
+        if (done) return;
+        startedAt = Date.now();
+        try { speechSynthesis.speak(u); } catch (e) { finish(); return; }
+
+        pollTimer = setInterval(() => {
+          if (done) { clearInterval(pollTimer); return; }
+          if (Date.now() - startedAt < 900) return;           // grace period
+          if (!speechSynthesis.speaking && !speechSynthesis.pending) {
+            clearInterval(pollTimer);
+            setTimeout(() => { if (!done && !speechSynthesis.speaking) finish(); }, 350);
+          }
+        }, 250);
+      }, 90);
+    });
+  }
+
+  // Warm up the voices list (Chrome loads them asynchronously)
+  if ('speechSynthesis' in window) {
+    speechSynthesis.getVoices();
+    speechSynthesis.onvoiceschanged = () => {};
+  }
+
+  muteBtn.addEventListener('click', () => {
+    muted = !muted;
+    muteBtn.innerHTML = muted ? '&#128263;' : '&#128266;';
+    muteBtn.title = muted ? 'Unmute voiceover' : 'Mute voiceover';
+    if (muted && 'speechSynthesis' in window) {
+      try { speechSynthesis.cancel(); } catch (e) {}
+    }
+  });
+
+  /* ---- Sequencing helpers ---- */
+  const sleep = ms => new Promise(r => setTimeout(r, ms));
+  let runId = 0;
+  class Abort extends Error {}
+
+  async function play() {
+    const my = ++runId;
+    const wait = async ms => { await sleep(ms); if (my !== runId) throw new Abort(); };
+
+    const show = async id => {
+      document.querySelectorAll('.scene').forEach(s => s.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+      await wait(420);
+    };
+
+    const say = (id, html) => {
+      const el = document.getElementById(id);
+      if (html !== undefined && html !== null) el.innerHTML = html;
+      el.classList.add('show');
+    };
+    const hush = id => document.getElementById(id).classList.remove('show');
+
+    /* Show a bubble AND speak the line; waits for the longer of the two. */
+    const talk = async (id, html, spoken, voice, minMs) => {
+      say(id, html);
+      await Promise.all([wait(minMs), speak(spoken, voice)]);
+    };
+
+    try {
+      /* -------- 1. Title (narrator) -------- */
+      await show('s1');
+      await wait(300);
+      document.getElementById('intro').classList.add('show');
+      await Promise.all([
+        wait(3800),
+        speak("You think you don't pay for social media... but...", VOICE.narrator)
+      ]);
+
+      /* -------- 2. Scrolling the feed -------- */
+      await show('s2');
+      document.getElementById('feed').classList.add('scrolling');
+      await wait(3200);
+      await talk('b2', null,
+                 "Oh yeah, we're out of milk!",
+                 VOICE.hero, 2600);
+
+      /* -------- 3. Supermarket: £50 milk -------- */
+      await show('s3');
+      await wait(700);
+      document.getElementById('tag50').classList.add('show');
+      await wait(2900);
+
+      /* -------- 4. Checkout (cashier) -------- */
+      await show('s4');
+      await wait(800);
+      await talk('b4', null,
+                 "That'll be fifty pounds please. Cash or card?",
+                 VOICE.cashier, 3200);
+
+      /* -------- 5. Rewind (narrator) -------- */
+      await show('s5');
+      document.getElementById('rewindText').classList.add('show');
+      await wait(1400);
+      document.getElementById('rewindText').classList.remove('show');
+      document.getElementById('rewindSub').classList.add('show');
+      await Promise.all([
+        wait(1900),
+        speak("Two weeks earlier.", VOICE.narrator)
+      ]);
+
+      /* -------- 6. Two weeks earlier: the deal -------- */
+      await show('s6');
+      await wait(500);
+
+      /* Social media exec — slick and fast */
+      await talk('b6a', null,
+                 "If you advertise on our app, the other supermarkets will close down, so you can set your prices as high as you want.",
+                 VOICE.social, 5200);
+      hush('b6a');
+
+      /* Supermarket boss — deep and worried */
+      await talk('b6b', null,
+                 "But if we pay for your adverts, our customers will have to pay fifty pounds for a bottle of milk!",
+                 VOICE.boss, 5200);
+      hush('b6b');
+
+      /* Social exec — dismissive */
+      await talk('b6c', null,
+                 "Well, tough.",
+                 VOICE.social, 2400);
+      hush('b6c');
+
+      /* -------- 7. Handshake -------- */
+      document.getElementById('boss').classList.add('shake');
+      document.getElementById('social').classList.add('shake');
+      await wait(2000);
+
+      /* Social exec — now it's their bill */
+      await talk('b6d', null,
+                 "That'll be ten million pounds. Cash or card?",
+                 VOICE.social, 3800);
+
+      /* -------- 8. YouPay (trailer announcer) -------- */
+      await show('s7');
+      await wait(500);
+      document.getElementById('yp').classList.add('show');
+      await wait(700);
+
+      /* Tag appears first, so the words are on screen while they're spoken */
+      document.getElementById('ypTag').classList.add('show');
+      await wait(250);
+      await speak("YouPay. Whether you want to, or not.", VOICE.announcer);
+
+      await wait(500);
+      document.getElementById('ypCta').classList.add('show');
+      await wait(250);
+      await speak("Find out how to stop paying for other people's ads, at youpay dot F Y I.",
+                  VOICE.announcer);
+
+      await wait(900);
+      document.getElementById('replay').classList.add('show');
+
+    } catch (e) {
+      if (!(e instanceof Abort)) throw e;
+    }
+  }
+
+  /* ---- Start gate: a click is required so browsers permit audio ---- */
+  const gate = document.getElementById('startgate');
+  document.getElementById('startBtn').addEventListener('click', () => {
+    // Prime speech synthesis inside the user gesture (important on iOS/Safari)
+    if ('speechSynthesis' in window) {
+      try {
+        const warm = new SpeechSynthesisUtterance(' ');
+        warm.volume = 0;
+        speechSynthesis.speak(warm);
+        speechSynthesis.cancel();
+      } catch (e) {}
+    }
+    gate.classList.add('gone');
+    muteBtn.classList.add('show');
+    setTimeout(play, 350);
+  });
+
+})();
+</script>
+</body>
+</html>

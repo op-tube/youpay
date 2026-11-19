@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>You Pay | The Hidden Cost of "Free" Social Media</title>
+    <style>
+        :root {
+            --yt-red: #FF0000;
+            --dark: #0f0f0f;
+            --light: #ffffff;
+            --gray: #606060;
+            --bg-light: #f9f9f9;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            color: var(--dark);
+            line-height: 1.6;
+            background-color: var(--light);
+            overflow-x: hidden;
+        }
+
+        /* --- Header & Logo --- */
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            padding: 0.8rem 2rem;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .brand {
+            font-family: 'Roboto', 'Segoe UI', Helvetica, Arial, sans-serif;
+            font-size: 1.8rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            display: inline-flex;
+            align-items: center;
+            gap: 0;
+            line-height: 1;
+        }
+
+        /* "You" — dark, slightly lighter weight, sits on the baseline */
+        .brand .you {
+            color: var(--dark);
+            font-weight: 600;
+            letter-spacing: -1px;
+            padding-right: 6px;
+        }
+
+        /* Red "Pay" block — taller, tighter, more YouTube-like */
+        .brand .pay {
+            background-color: var(--yt-red);
+            color: var(--light);
+            font-weight: 700;
+            font-size: 1.8rem;
+            line-height: 1;
+            padding: 4px 10px 5px;
+            border-radius: 8px;
+            letter-spacing: -0.5px;
+            display: inline-block;
+            transform: translateY(-1px);
+        }
+
+        .brand .suffix {
+            color: var(--gray);
+            font-weight: 400;
+            font-size: 1.15rem;
+            margin-left: 10px;
+            letter-spacing: -0.2px;
+        }
+
+        /* --- Sections --- */
+        section {
+            min-height: auto;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 4rem 2rem 3rem;
+            text-align: center;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 1.2rem;
+            letter-spacing: -1px;
+        }
+
+        .hero p {
+            font-size: 1.3rem;
+            color: var(--gray);
+            max-width: 700px;
+            margin-bottom: 1.5rem;
+        }
+
+        .stat-box {
+            background: var(--bg-light);
+            border-left: 5px solid var(--yt-red);
+            padding: 1.6rem;
+            margin: 1.2rem 0;
+            text-align: left;
+            border-radius: 0 8px 8px 0;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+        }
+
+        .stat-box h3 {
+            font-size: 1.6rem;
+            margin-bottom: 0.4rem;
+            color: var(--dark);
+        }
+
+        .stat-box p {
+            font-size: 1.05rem;
+            color: var(--gray);
+            margin: 0;
+        }
+
+        .highlight {
+            color: var(--yt-red);
+            font-weight: 700;
+        }
+
+        /* --- Video Embed Section --- */
+        .video-section {
+            background-color: var(--dark);
+            color: var(--light);
+            width: 100%;
+            max-width: 100%;
+            padding: 4rem 2rem;
+        }
+
+        .video-section h2 {
+            font-size: 2.3rem;
+            margin-bottom: 1.5rem;
+            font-weight: 700;
+        }
+
+        .video-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            aspect-ratio: 16 / 9;
+            background: #000;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            margin: 0 auto;
+        }
+
+        .video-container iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+
+        .video-container.loaded iframe {
+            opacity: 1;
+        }
+
+        /* Play Button Overlay */
+        .play-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: background 0.3s ease;
+            z-index: 10;
+        }
+
+        .play-overlay:hover {
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        .play-button {
+            width: 80px;
+            height: 80px;
+            background-color: var(--yt-red);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 8px 20px rgba(255, 0, 0, 0.4);
+            transition: transform 0.2s ease;
+        }
+
+        .play-overlay:hover .play-button {
+            transform: scale(1.1);
+        }
+
+        .play-button svg {
+            width: 32px;
+            height: 32px;
+            fill: white;
+            margin-left: 4px; /* Optical centering for play triangle */
+        }
+
+        /* --- CTA Section --- */
+        .cta-section {
+            background: var(--bg-light);
+            min-height: auto;
+            padding: 4rem 2rem;
+        }
+
+        .cta-section h2 {
+            font-size: 2.6rem;
+            margin-bottom: 1.2rem;
+            font-weight: 800;
+        }
+
+        .cta-button {
+            display: inline-block;
+            background-color: var(--yt-red);
+            color: white;
+            font-size: 1.3rem;
+            font-weight: 700;
+            padding: 1.2rem 3rem;
+            border-radius: 50px;
+            text-decoration: none;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            box-shadow: 0 8px 20px rgba(255, 0, 0, 0.3);
+        }
+
+        .cta-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 30px rgba(255, 0, 0, 0.4);
+        }
+
+        footer {
+            text-align: center;
+            padding: 1.5rem;
+            color: var(--gray);
+            font-size: 0.9rem;
+            border-top: 1px solid #eee;
+        }
+
+        /* Mobile Responsiveness */
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 2.2rem; }
+            .brand { font-size: 1.4rem; }
+            .brand .pay { font-size: 1.4rem; padding: 3px 8px 4px; }
+            .brand .suffix { font-size: 0.95rem; }
+            section { padding: 3rem 1.2rem 2rem; }
+            .stat-box h3 { font-size: 1.3rem; }
+            .video-section h2 { font-size: 1.7rem; }
+            .cta-section h2 { font-size: 1.9rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Sticky Header -->
+    <header>
+        <div class="brand" id="dynamic-header">
+            <span class="you">You</span><span class="pay">Pay</span> <span class="suffix">with your food bill</span>
+        </div>
+    </header>
+
+    <!-- Section 1: Food -->
+    <section class="scroll-section hero" data-header='<span class="you">You</span><span class="pay">Pay</span> <span class="suffix">with your food bill</span>'>
+        <h1>You think social media is free.<br>It’s not.</h1>
+        <p>Every time you scroll, you are being sold. But the money doesn't come from thin air. It comes from your everyday essentials.</p>
+        
+        <div class="stat-box">
+            <h3>The Half-Trillion Dollar Ad Machine</h3>
+            <p>In 2024, <strong>Meta</strong> (Facebook, Instagram) generated over <span class="highlight">$164 billion</span> in revenue, almost entirely from advertising. Meanwhile, <strong>Alphabet</strong> (Google, YouTube) generated nearly <span class="highlight">$300 billion</span> just from ads. Together, Big Tech extracts close to <strong>half a trillion dollars annually</strong> from the global economy.</p>
+        </div>
+    </section>
+
+    <!-- Section 2: Electricity -->
+    <section class="scroll-section" data-header='<span class="you">You</span><span class="pay">Pay</span> <span class="suffix">with your electricity bill</span>'>
+        <h1>Where does that money come from?</h1>
+        <p>Big Tech doesn't create that wealth out of nowhere. They sell your attention to the world's largest corporations.</p>
+        <p style="font-size: 1.2rem; max-width: 700px; margin-top: 1rem;">
+            The grocery chains, energy providers, and automotive companies you rely on spend <strong>billions of your dollars</strong> to advertise on these platforms. Those massive marketing budgets aren't absorbed by the companies—they are baked directly into the prices you pay at the register and on your monthly statements.
+        </p>
+    </section>
+
+    <!-- Section 3: Car Bills -->
+    <section class="scroll-section" data-header='<span class="you">You</span><span class="pay">Pay</span> <span class="suffix">with your car bills</span>'>
+        <h1>The Hidden Tax on Your Life</h1>
+        <p>When you buy food, pay your electricity bill, or finance your car, a hidden fraction of that payment is funneled directly into Silicon Valley's ad networks.</p>
+        <p style="font-size: 1.2rem; max-width: 700px; margin-top: 1rem;">
+            You are indirectly funding the very platforms that harvest your data, manipulate your attention, and fracture society. <strong>Your essential bills are subsidizing Big Tech's record-breaking profits.</strong>
+        </p>
+    </section>
+
+    <!-- Video Embed Section -->
+    <section class="video-section" id="video-section">
+        <h2>Find out how you pay for social media</h2>
+        <div class="video-container" id="videoContainer">
+            <div class="play-overlay" id="playOverlay">
+                <div class="play-button">
+                    <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                </div>
+            </div>
+            <!-- The iframe is lazy-loaded via JS to behave like a real video player -->
+            <iframe id="videoFrame" data-src="https://youpay.fyi/video" title="How you pay for social media" allow="autoplay; fullscreen"></iframe>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta-section">
+        <h2>So how do I avoid paying?</h2>
+        <p style="font-size: 1.15rem; color: var(--gray); margin-bottom: 2rem; max-width: 600px;">
+            You can't stop the ad machine entirely, but you can choose where your money goes. Support companies that refuse to give your money away to Big Tech.
+        </p>
+        <a href="https://youpay.fyi/boycott/" class="cta-button">See the Boycott List</a>
+    </section>
+
+    <footer>
+        <p>Your everyday bills are funding Big Tech. Take your money back.</p>
+    </footer>
+
+    <script>
+        // --- Scroll Header Logic ---
+        const headerContent = document.getElementById('dynamic-header');
+        const sections = document.querySelectorAll('.scroll-section');
+
+        const observerOptions = {
+            root: null,
+            rootMargin: '0px',
+            threshold: 0.5 // Trigger when 50% of the section is visible
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    // Smoothly update the header text
+                    headerContent.innerHTML = entry.target.getAttribute('data-header');
+                }
+            });
+        }, observerOptions);
+
+        sections.forEach(section => {
+            observer.observe(section);
+        });
+
+        // --- Video Player Logic ---
+        const playOverlay = document.getElementById('playOverlay');
+        const videoContainer = document.getElementById('videoContainer');
+        const videoFrame = document.getElementById('videoFrame');
+
+        playOverlay.addEventListener('click', () => {
+            // Load the iframe source only when the user clicks play (saves bandwidth, behaves like a real video)
+            videoFrame.src = videoFrame.getAttribute('data-src');
+            videoContainer.classList.add('loaded');
+            
+            // Fade out and remove the overlay
+            playOverlay.style.opacity = '0';
+            setTimeout(() => {
+                playOverlay.style.display = 'none';
+            }, 300);
+        });
+    </script>
+</body>
+</html>

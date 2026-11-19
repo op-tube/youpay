@@ -1,0 +1,1009 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>You Pay | The Boycott List — UK Energy &amp; Supermarkets</title>
+    <meta name="description" content="16 of the UK's biggest energy and grocery brands, audited against the Meta Ad Library and Google Ads Transparency Center. Who funds Big Tech with your bills — and who doesn't.">
+    <style>
+        :root {
+            --yt-red: #FF0000;
+            --dark: #0f0f0f;
+            --light: #ffffff;
+            --gray: #606060;
+            --bg-light: #f9f9f9;
+            --green: #1e7e34;
+            --amber: #e8940a;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', 'Segoe UI', Helvetica, Arial, sans-serif;
+            color: var(--dark);
+            line-height: 1.6;
+            background-color: var(--light);
+            overflow-x: hidden;
+        }
+
+        /* --- Header & YouTube-style "You Pay" Logo --- */
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            padding: 0.8rem 2rem;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .brand {
+            font-family: 'Roboto', 'Segoe UI', Helvetica, Arial, sans-serif;
+            font-size: 1.8rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            display: inline-flex;
+            align-items: center;
+            gap: 0;
+            line-height: 1;
+            text-decoration: none;
+        }
+
+        .brand .you {
+            color: var(--dark);
+            font-weight: 600;
+            letter-spacing: -1px;
+            padding-right: 6px;
+        }
+
+        .brand .pay {
+            background-color: var(--yt-red);
+            color: var(--light);
+            font-weight: 700;
+            font-size: 1.8rem;
+            line-height: 1;
+            padding: 4px 10px 5px;
+            border-radius: 8px;
+            letter-spacing: -0.5px;
+            display: inline-block;
+            transform: translateY(-1px);
+        }
+
+        .brand .suffix {
+            color: var(--gray);
+            font-weight: 400;
+            font-size: 1.15rem;
+            margin-left: 10px;
+            letter-spacing: -0.2px;
+        }
+
+        /* --- Sections --- */
+        section {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 4rem 2rem 3rem;
+            text-align: center;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        section.wide {
+            max-width: 100%;
+        }
+
+        h1 {
+            font-size: 3.2rem;
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 1.2rem;
+            letter-spacing: -1px;
+        }
+
+        h2 {
+            font-size: 2.2rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            margin-bottom: 1rem;
+        }
+
+        section > p.lead {
+            font-size: 1.25rem;
+            color: var(--gray);
+            max-width: 720px;
+            margin: 0 auto 1.5rem;
+        }
+
+        .highlight {
+            color: var(--yt-red);
+            font-weight: 700;
+        }
+
+        a {
+            color: var(--yt-red);
+        }
+
+        /* --- Stat boxes --- */
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.2rem;
+            margin: 1.5rem 0 0.5rem;
+            width: 100%;
+            max-width: 1000px;
+        }
+
+        .stat-box {
+            background: var(--bg-light);
+            border-left: 5px solid var(--yt-red);
+            padding: 1.6rem;
+            text-align: left;
+            border-radius: 0 8px 8px 0;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+        }
+
+        .stat-box h3 {
+            font-size: 1.9rem;
+            margin-bottom: 0.4rem;
+            color: var(--dark);
+            letter-spacing: -0.5px;
+        }
+
+        .stat-box p {
+            font-size: 1rem;
+            color: var(--gray);
+            margin: 0;
+        }
+
+        /* --- Legend --- */
+        .legend {
+            background: var(--bg-light);
+            padding: 3rem 2rem;
+        }
+
+        .legend-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.8rem 2rem;
+            max-width: 760px;
+            margin: 0 auto;
+            text-align: left;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.8rem;
+            font-size: 1rem;
+            color: var(--gray);
+        }
+
+        .legend-item .badge {
+            flex-shrink: 0;
+            margin-top: 3px;
+        }
+
+        /* --- Tables --- */
+        .table-wrap {
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+            margin-top: 1rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--light);
+            font-size: 1rem;
+            min-width: 560px;
+        }
+
+        thead th {
+            text-align: left;
+            font-size: 0.78rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            color: var(--gray);
+            padding: 0.9rem 1rem;
+            border-bottom: 2px solid #e5e5e5;
+            background: var(--bg-light);
+            white-space: nowrap;
+        }
+
+        tbody td {
+            padding: 0.85rem 1rem;
+            border-bottom: 1px solid #eee;
+            text-align: left;
+            vertical-align: middle;
+        }
+
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        tbody tr:hover {
+            background: var(--bg-light);
+        }
+
+        td.co {
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 2px 10px;
+            border-radius: 999px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            letter-spacing: 0.2px;
+            white-space: nowrap;
+        }
+
+        .badge.yes { background-color: var(--yt-red); color: #fff; }
+        .badge.no { background-color: var(--green); color: #fff; }
+        .badge.partial { background-color: #ffb020; color: #212121; }
+
+        .verdict {
+            font-weight: 700;
+            font-size: 0.95rem;
+            white-space: nowrap;
+        }
+
+        .verdict.avoid { color: var(--yt-red); }
+        .verdict.partial { color: var(--amber); }
+        .verdict.pick { color: var(--green); }
+
+        .footnote {
+            font-size: 0.85rem;
+            color: var(--gray);
+            text-align: left;
+            max-width: 760px;
+            margin: 0.8rem auto 0;
+        }
+
+        /* --- Tier cards (dark section) --- */
+        .tiers-section {
+            background-color: var(--dark);
+            color: var(--light);
+            width: 100%;
+            max-width: 100%;
+        }
+
+        .tiers-section h2 {
+            color: var(--light);
+        }
+
+        .tiers-section p.lead {
+            color: #aaa;
+        }
+
+        .tier-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.2rem;
+            max-width: 1000px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        .tier-card {
+            background: #1a1a1a;
+            border-radius: 8px;
+            padding: 1.5rem;
+            text-align: left;
+            border-top: 4px solid var(--gray);
+        }
+
+        .tier-card.red { border-top-color: var(--yt-red); }
+        .tier-card.amber { border-top-color: #ffb020; }
+        .tier-card.green { border-top-color: var(--green); }
+
+        .tier-card .count {
+            font-size: 2.2rem;
+            font-weight: 800;
+            letter-spacing: -1px;
+            line-height: 1;
+        }
+
+        .tier-card.red .count { color: var(--yt-red); }
+        .tier-card.amber .count { color: #ffb020; }
+        .tier-card.green .count { color: #2ea44f; }
+
+        .tier-card h3 {
+            font-size: 1.1rem;
+            margin: 0.4rem 0 0.8rem;
+        }
+
+        .tier-card ul {
+            list-style: none;
+        }
+
+        .tier-card li {
+            font-size: 0.95rem;
+            color: #ccc;
+            padding: 0.25rem 0;
+            border-bottom: 1px solid #2a2a2a;
+        }
+
+        .tier-card li:last-child { border-bottom: none; }
+
+        .tier-card li small {
+            color: #888;
+            font-size: 0.8rem;
+        }
+
+        /* --- Recommendation cards --- */
+        .picks {
+            display: flex;
+            flex-direction: column;
+            gap: 1.2rem;
+            width: 100%;
+            max-width: 760px;
+        }
+
+        .pick-card {
+            background: var(--bg-light);
+            border-left: 5px solid var(--green);
+            border-radius: 0 8px 8px 0;
+            padding: 1.6rem;
+            text-align: left;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+        }
+
+        .pick-card .pick-tag {
+            display: inline-block;
+            background: var(--green);
+            color: #fff;
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            padding: 2px 10px;
+            border-radius: 999px;
+            margin-bottom: 0.5rem;
+        }
+
+        .pick-card h3 {
+            font-size: 1.4rem;
+            margin-bottom: 0.4rem;
+        }
+
+        .pick-card p {
+            font-size: 1rem;
+            color: #444;
+        }
+
+        .pick-card p + p {
+            margin-top: 0.6rem;
+        }
+
+        /* --- Action / email template --- */
+        .action-section {
+            background: var(--bg-light);
+        }
+
+        .steps {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.2rem;
+            max-width: 1000px;
+            width: 100%;
+            margin: 0 auto 2rem;
+        }
+
+        .step {
+            background: var(--light);
+            border-radius: 8px;
+            padding: 1.4rem;
+            text-align: left;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+        }
+
+        .step .num {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--yt-red);
+            color: #fff;
+            font-weight: 800;
+            font-size: 1rem;
+            margin-bottom: 0.6rem;
+        }
+
+        .step h3 {
+            font-size: 1.1rem;
+            margin-bottom: 0.3rem;
+        }
+
+        .step p {
+            font-size: 0.95rem;
+            color: var(--gray);
+        }
+
+        .email-box {
+            background: var(--dark);
+            color: #ddd;
+            border-radius: 10px;
+            max-width: 760px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 1.6rem;
+            text-align: left;
+            position: relative;
+        }
+
+        .email-box .email-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.8rem;
+            gap: 1rem;
+        }
+
+        .email-box h3 {
+            color: #fff;
+            font-size: 1.1rem;
+        }
+
+        .copy-btn {
+            background: var(--yt-red);
+            color: #fff;
+            border: none;
+            font-family: inherit;
+            font-size: 0.85rem;
+            font-weight: 700;
+            padding: 0.5rem 1.1rem;
+            border-radius: 999px;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+            box-shadow: 0 4px 14px rgba(255, 0, 0, 0.35);
+        }
+
+        .copy-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(255, 0, 0, 0.45);
+        }
+
+        .email-box pre {
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            color: #e6e6e6;
+        }
+
+        /* --- Sources --- */
+        .sources-section {
+            padding: 3rem 2rem;
+        }
+
+        .sources-section h2 {
+            font-size: 1.4rem;
+            text-align: left;
+            margin-bottom: 0.8rem;
+        }
+
+        .sources-section .method {
+            font-size: 0.95rem;
+            color: var(--gray);
+            text-align: left;
+            max-width: 760px;
+            margin: 0 auto;
+        }
+
+        .sources-list {
+            list-style: none;
+            text-align: left;
+            max-width: 760px;
+            margin: 1rem auto 0;
+        }
+
+        .sources-list li {
+            font-size: 0.85rem;
+            color: var(--gray);
+            padding: 0.35rem 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .sources-list li:last-child { border-bottom: none; }
+
+        /* --- CTA Section --- */
+        .cta-section {
+            background: var(--bg-light);
+            padding: 4rem 2rem;
+        }
+
+        .cta-section h2 {
+            font-size: 2.6rem;
+            margin-bottom: 1.2rem;
+            font-weight: 800;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .cta-button {
+            display: inline-block;
+            background-color: var(--yt-red);
+            color: white;
+            font-size: 1.2rem;
+            font-weight: 700;
+            padding: 1.1rem 2.6rem;
+            border-radius: 50px;
+            text-decoration: none;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            box-shadow: 0 8px 20px rgba(255, 0, 0, 0.3);
+            border: none;
+            cursor: pointer;
+            font-family: inherit;
+        }
+
+        .cta-button.secondary {
+            background: var(--light);
+            color: var(--dark);
+            border: 2px solid var(--dark);
+            box-shadow: none;
+        }
+
+        .cta-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 30px rgba(255, 0, 0, 0.4);
+        }
+
+        footer {
+            text-align: center;
+            padding: 1.5rem;
+            color: var(--gray);
+            font-size: 0.9rem;
+            border-top: 1px solid #eee;
+        }
+
+        footer p + p {
+            margin-top: 0.3rem;
+            font-size: 0.8rem;
+            color: #999;
+        }
+
+        /* Mobile Responsiveness */
+        @media (max-width: 768px) {
+            h1 { font-size: 2.2rem; }
+            h2 { font-size: 1.7rem; }
+            .brand { font-size: 1.4rem; }
+            .brand .pay { font-size: 1.4rem; padding: 3px 8px 4px; }
+            .brand .suffix { font-size: 0.95rem; }
+            section { padding: 3rem 1.2rem 2rem; }
+            .stat-grid { grid-template-columns: 1fr; }
+            .legend-grid { grid-template-columns: 1fr; }
+            .tier-grid { grid-template-columns: 1fr; }
+            .steps { grid-template-columns: 1fr; }
+            .stat-box h3 { font-size: 1.6rem; }
+            .cta-section h2 { font-size: 1.9rem; }
+            .cta-button { font-size: 1.05rem; padding: 1rem 2rem; }
+            .email-box .email-head { flex-direction: column; align-items: flex-start; }
+        }
+
+        /* Print: the list, not the chrome */
+        @media print {
+            header, .cta-section, footer, .email-box, .copy-btn { display: none; }
+            section { padding: 1rem 0; }
+            body { color: #000; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Sticky Header -->
+    <header>
+        <a class="brand" href="https://youpay.fyi/" aria-label="You Pay home">
+            <span class="you">You</span><span class="pay">Pay</span> <span class="suffix">the boycott list</span>
+        </a>
+    </header>
+
+    <!-- Hero -->
+    <section class="hero" style="padding-top: 6rem;">
+        <h1>The Boycott List</h1>
+        <p class="lead">You've seen how your everyday bills fund Big Tech. Here's exactly who's charging you for the privilege — and who isn't. Sixteen of the UK's biggest energy, grocery and pub brands, audited against the <a href="https://www.facebook.com/ads/library/" target="_blank" rel="noopener">Meta Ad Library</a> and the <a href="https://adstransparency.google.com/" target="_blank" rel="noopener">Google Ads Transparency Center</a>.</p>
+
+        <div class="stat-grid">
+            <div class="stat-box">
+                <h3>&pound;42.6bn</h3>
+                <p>Spent on advertising in the UK in 2024. At least <strong>half of it went straight to Google and Meta</strong>, according to Press Gazette estimates.</p>
+            </div>
+            <div class="stat-box">
+                <h3>&pound;35.5bn</h3>
+                <p>The UK's digital ad market in 2024 — growing 13% a year, roughly <strong>12 times faster than the UK economy</strong> (IAB UK / PwC).</p>
+            </div>
+            <div class="stat-box">
+                <h3>10 of 16</h3>
+                <p>Brands in this audit advertise on <strong>both</strong> Meta and Google. Exactly one advertises on <strong>neither</strong>.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Legend -->
+    <section class="legend wide">
+        <h2 style="font-size: 1.5rem;">How to read this list</h2>
+        <div class="legend-grid">
+            <div class="legend-item"><span class="badge yes">Yes</span><span>Active ads found on that platform at the time of the audit.</span></div>
+            <div class="legend-item"><span class="badge no">No</span><span>No ads found on that platform.</span></div>
+            <div class="legend-item"><span class="badge partial">Non-food</span><span>Ads on Google found only for non-food ranges (clothing, general merchandise).</span></div>
+            <div class="legend-item"><span class="verdict pick">Best pick</span><span>Funds neither platform — or the cleanest option in its category.</span></div>
+        </div>
+    </section>
+
+    <!-- Energy -->
+    <section id="energy" style="padding-top: 4.5rem;">
+        <h2>Energy suppliers</h2>
+        <p class="lead">Your gas and electricity bill is one of your biggest annual outgoings — and six of the seven suppliers below pump part of it into <em>both</em> ad machines. Every name here is a household giant; only one stays off Facebook and Instagram.</p>
+
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Supplier</th>
+                        <th>Ads on Meta</th>
+                        <th>Ads on Google</th>
+                        <th>Verdict</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="co">Octopus Energy</td>
+                        <td><span class="badge yes">Yes</span></td>
+                        <td><span class="badge yes">Yes</span></td>
+                        <td><span class="verdict avoid">Avoid</span></td>
+                    </tr>
+                    <tr>
+                        <td class="co">British Gas</td>
+                        <td><span class="badge yes">Yes</span></td>
+                        <td><span class="badge yes">Yes</span></td>
+                        <td><span class="verdict avoid">Avoid</span></td>
+                    </tr>
+                    <tr>
+                        <td class="co">Ecotricity</td>
+                        <td><span class="badge no">No</span></td>
+                        <td><span class="badge yes">Yes*</span></td>
+                        <td><span class="verdict pick">Best pick</span></td>
+                    </tr>
+                    <tr>
+                        <td class="co">E.ON Next</td>
+                        <td><span class="badge yes">Yes</span></td>
+                        <td><span class="badge yes">Yes</span></td>
+                        <td><span class="verdict avoid">Avoid</span></td>
+                    </tr>
+                    <tr>
+                        <td class="co">OVO</td>
+                        <td><span class="badge yes">Yes</span></td>
+                        <td><span class="badge yes">Yes</span></td>
+                        <td><span class="verdict avoid">Avoid</span></td>
+                    </tr>
+                    <tr>
+                        <td class="co">EDF</td>
+                        <td><span class="badge yes">Yes</span></td>
+                        <td><span class="badge yes">Yes</span></td>
+                        <td><span class="verdict avoid">Avoid</span></td>
+                    </tr>
+                    <tr>
+                        <td class="co">ScottishPower</td>
+                        <td><span class="badge yes">Yes</span></td>
+                        <td><span class="badge yes">Yes</span></td>
+                        <td><span class="verdict avoid">Avoid</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <p class="footnote">* Ecotricity still buys Google ads — it's the remaining gap in an otherwise clean record.</p>
+    </section>
+
+    <!-- Supermarkets -->
+    <section id="supermarkets" class="wide" style="background: var(--bg-light); padding-top: 4rem;">
+        <h2>Supermarkets &amp; discounters</h2>
+        <p class="lead">The weekly shop is where the ad budgets get serious. Tesco, Asda, Aldi and Lidl advertise on both platforms; Sainsbury's and Morrisons at least keep their Google ads to non-food ranges; and one discounter doesn't advertise at all.</p>
+
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Retailer</th>
+                        <th>Ads on Meta</th>
+                        <th>Ads on Google</th>
+                        <th>Verdict</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="co">Asda</td>
+                        <td><span class="badge yes">Yes</span></td>
+                        <td><span class="badge partial">Non-food&dagger;</span></td>
+                        <td><span class="verdict partial">Partial</span></td>
+                    </tr>
+                    <tr>
+                        <td class="co">Sainsbury's</td>
+                        <td><span class="badge yes">Yes</span></td>
+                        <td><span class="badge yes">Yes</span></td>
+                        <td><span class="verdict avoid">Avoid</span></td>
+                    </tr>
+                    <tr>
+                        <td class="co">Morrisons</td>
+                        <td><span class="badge yes">Yes</span></td>
+                        <td><span class="badge partial">Non-food&dagger;</span></td>
+                        <td><span class="verdict partial">Partial</span></td>
+                    </tr>
+                    <tr>
+                        <td class="co">Tesco</td>
+                        <td><span class="badge yes">Yes</span></td>
+                        <td><span class="badge yes">Yes</span></td>
+                        <td><span class="verdict avoid">Avoid</span></td>
+                    </tr>
+                    <tr>
+                        <td class="co">Aldi</td>
+                        <td><span class="badge yes">Yes</span></td>
+                        <td><span class="badge yes">Yes</span></td>
+                        <td><span class="verdict avoid">Avoid</span></td>
+                    </tr>
+                    <tr>
+                        <td class="co">Lidl</td>
+                        <td><span class="badge yes">Yes</span></td>
+                        <td><span class="badge yes">Yes</span></td>
+                        <td><span class="verdict avoid">Avoid</span></td>
+                    </tr>
+                    <tr>
+                        <td class="co">B&amp;M</td>
+                        <td><span class="badge yes">Yes</span></td>
+                        <td><span class="badge no">No</span></td>
+                        <td><span class="verdict partial">Partial</span></td>
+                    </tr>
+                    <tr>
+                        <td class="co">Home Bargains</td>
+                        <td><span class="badge no">No</span></td>
+                        <td><span class="badge no">No</span></td>
+                        <td><span class="verdict pick">Best pick</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <p class="footnote">&dagger; Ads found on Google only for non-food ranges. Still funds Meta on the food side of the business.</p>
+    </section>
+
+    <!-- Pubs -->
+    <section id="pubs">
+        <h2>Pubs</h2>
+        <p class="lead">One pub chain stands alone. Wetherspoon deleted every one of its social media accounts in April 2018, with chairman Tim Martin citing trolling and the misuse of personal data — years before "social media harms" became a parliamentary topic.</p>
+
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Pub chain</th>
+                        <th>Ads on Meta</th>
+                        <th>Ads on Google</th>
+                        <th>Verdict</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="co">JD Wetherspoon</td>
+                        <td><span class="badge no">No</span></td>
+                        <td><span class="badge yes">Yes*</span></td>
+                        <td><span class="verdict pick">Best pick</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <p class="footnote">* Still buys Google ads — the remaining gap. Tell them to close it.</p>
+    </section>
+
+    <!-- Tiers -->
+    <section class="tiers-section wide">
+        <h2>Where your money goes</h2>
+        <p class="lead">Sort your bills by how much of them ends up in the ad auction.</p>
+
+        <div class="tier-grid">
+            <div class="tier-card red">
+                <div class="count">10</div>
+                <h3>The double funders</h3>
+                <ul>
+                    <li>Octopus Energy</li>
+                    <li>British Gas</li>
+                    <li>E.ON Next</li>
+                    <li>OVO</li>
+                    <li>EDF</li>
+                    <li>ScottishPower</li>
+                    <li>Sainsbury's</li>
+                    <li>Tesco</li>
+                    <li>Aldi</li>
+                    <li>Lidl</li>
+                </ul>
+            </div>
+            <div class="tier-card amber">
+                <div class="count">5</div>
+                <h3>The half measures</h3>
+                <ul>
+                    <li>Asda <small>Doesn't advertise food on Google - unfortunately still does on Meta</small></li>
+                    <li>Morrisons <small>Doesn't advertise food on Google - unfortunately still does on Meta</small></li>
+                    <li>B&amp;M <small>Meta only</small></li>
+                    <li>Ecotricity <small>Google only</small></li>
+                    <li>JD Wetherspoon <small>Google only</small></li>
+                </ul>
+            </div>
+            <div class="tier-card green">
+                <div class="count">1</div>
+                <h3>The clean one</h3>
+                <ul>
+                    <li>Home Bargains <small>no ads on either platform</small></li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- Recommendations -->
+    <section id="picks">
+        <h2>Where to take your money instead</h2>
+        <p class="lead">You still need energy and food, and you might want a pint from time to time. Here's how to spend without funding the ad machine — or at least funding it as little as the UK market currently allows.</p>
+
+        <div class="picks">
+            <div class="pick-card">
+                <span class="pick-tag">Energy</span>
+                <h3>Ecotricity</h3>
+                <p>The only energy supplier in our audit that doesn't advertise on Facebook or Instagram. Ethical Consumer rates it a Best Buy, its gas is certified vegan, and it builds new wind and solar farms rather than just reselling certificates.</p>
+                <p>Not spotless — it still buys Google ads — so when you switch, tell them to drop those too.</p>
+            </div>
+
+            <div class="pick-card">
+                <span class="pick-tag">Household essentials</span>
+                <h3>Home Bargains</h3>
+                <p>The only name on the entire list that advertises on <strong>neither</strong> Meta nor Google. The family-owned Liverpool discounter (TJ Morris) has grown to hundreds of stores on a prices-not-promises model — and the empty ad libraries are the proof.</p>
+            </div>
+
+            <div class="pick-card">
+                <span class="pick-tag">Pubs</span>
+                <h3>JD Wetherspoon</h3>
+                <p>Quit social media entirely in April 2018, deleting its accounts across Facebook, Twitter and Instagram over concerns about trolling and data misuse — and never came back. It still runs Google ads, which is the remaining gap in an otherwise rare record.</p>
+            </div>
+
+            <div class="pick-card">
+                <span class="pick-tag">Toiletries &amp; gifts</span>
+                <h3>Lush</h3>
+                <p>Not in the original audit, but impossible to leave off this list. In November 2021 the Dorset-founded brand switched off Instagram, Facebook, TikTok and Snapchat in all 48 countries where it trades — "until the platforms take action to provide a safer environment for users." Proof that a major UK retailer can walk away and keep growing. They also don't advertise on Google as far as we can tell.</p>
+            </div>
+
+            <div class="pick-card">
+                <span class="pick-tag">Everything else</span>
+                <h3>Your local independents</h3>
+                <p>Greengrocers, butchers, bakers, markets, refill shops. The closer your money stays to your front door, the less of it gets funnelled into an ad auction run in California. No loyalty app, no data harvest, no sponsored posts.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Make them listen -->
+    <section class="action-section wide">
+        <h2>Make them listen</h2>
+        <p class="lead">Boycotts only work when companies know they're being boycotted. Silence reads as indifference.</p>
+
+        <div class="steps">
+            <div class="step">
+                <span class="num">1</span>
+                <h3>Email them</h3>
+                <p>Companies track why customers leave far more closely than why they arrive. Use the template below.</p>
+            </div>
+            <div class="step">
+                <span class="num">2</span>
+                <h3>Switch</h3>
+                <p>Energy takes about 15 minutes to move. Supermarkets take one changed walk. Nothing speaks like lost revenue.</p>
+            </div>
+            <div class="step">
+                <span class="num">3</span>
+                <h3>Tell everyone why</h3>
+                <p>Share the list. A boycott of one is invisible; a boycott of a street is a boardroom agenda item.</p>
+            </div>
+        </div>
+
+        <div class="email-box">
+            <div class="email-head">
+                <h3>Copy-paste complaint template</h3>
+                <button class="copy-btn" id="copyEmail" type="button">Copy template</button>
+            </div>
+            <pre id="emailTemplate">Subject: I'm leaving because of your ad spend
+
+Dear [Company],
+
+I've learned that [Company] advertises on [Meta / Google / both]. That
+budget is built into the prices I pay you, and it funds platforms that
+profit from surveillance and attention manipulation.
+
+I'm switching to a competitor that doesn't. If you pull your advertising
+from these platforms, I'll happily come back.
+
+[Your name]</pre>
+        </div>
+    </section>
+
+    <!-- Method & sources -->
+    <section class="sources-section wide">
+        <div class="method-wrap" style="max-width: 760px; margin: 0 auto;">
+            <h2>Method &amp; sources</h2>
+            <p class="method">Each brand was checked in the <a href="https://www.facebook.com/ads/library/" target="_blank" rel="noopener">Meta Ad Library</a> and the <a href="https://adstransparency.google.com/" target="_blank" rel="noopener">Google Ads Transparency Center</a> for the UK. "Yes" means ads were found at the time of the audit; "non-food" means Google ads were found only for non-food ranges. Campaigns start and stop, so statuses change — we re-run the audit periodically. Ad data gathered by youpay.fyi research; context from the sources below.</p>
+            <ul class="sources-list">
+                <li>Press Gazette — "Google and Meta's vast estimated UK earnings revealed": at least half of the record &pound;42.6bn spent on UK advertising in 2024 went to Google and Meta (May 2025). <a href="https://pressgazette.co.uk/marketing/google-meta-advertising-market-share" target="_blank" rel="noopener">pressgazette.co.uk</a></li>
+                <li>IAB UK / PwC Digital Adspend: UK digital ad market reached &pound;35.5bn in 2024, up 13% (Apr 2025). <a href="https://www.iabuk.com/news-article/digital-adspend-2024-uks-overall-digital-ad-market-hits-ps355bn" target="_blank" rel="noopener">iabuk.com</a></li>
+                <li>BBC News — "Wetherspoon pub chain shuts its social media accounts" (Apr 2018). <a href="https://www.bbc.com/news/business-43781281" target="_blank" rel="noopener">bbc.com</a></li>
+                <li>Lush — "Lush is switching up social": quitting Instagram, Facebook, TikTok and Snapchat in 48 countries (Nov 2021). <a href="https://weare.lush.com/press-releases/lush-is-taking-fresh-approach-social" target="_blank" rel="noopener">weare.lush.com</a></li>
+                <li>Ethical Consumer — Energy suppliers shopping guide: Ecotricity's vegan gas and new renewable build-out. <a href="https://www.ethicalconsumer.org/energy/shopping-guide/energy-suppliers" target="_blank" rel="noopener">ethicalconsumer.org</a></li>
+                <li>The Grocer — "The secret of Home Bargains' success": the low-profile, prices-led model (Jan 2019). <a href="https://www.thegrocer.co.uk/comment-and-opinion/going-further-the-secret-of-home-bargains-success/575399.article" target="_blank" rel="noopener">thegrocer.co.uk</a></li>
+            </ul>
+        </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="cta-section wide">
+        <h2>Take your money back.</h2>
+        <p class="lead">Switch your supplier. Switch your supermarket. Then tell them why.</p>
+        <div class="cta-buttons">
+            <a href="https://youpay.fyi/" class="cta-button">How you pay &rarr;</a>
+            <button class="cta-button secondary" id="copyLink" type="button">Copy link to this list</button>
+        </div>
+    </section>
+
+    <footer>
+        <p>Your everyday bills are funding Big Tech. Take your money back.</p>
+        <p>Independent project. Not affiliated with, endorsed by, or connected to YouTube, Google, Meta, or any company listed. Check out our other projects <a href="https://chillspace.ai/">ChillSpace</a>, a placebo social app to help you quit real ones, and <a href="https://quitthe.app/">QuitThe.app, a general guide on how and why to quit social apps.</a/></p>
+    </footer>
+
+    <script>
+        // --- Clipboard helper ---
+        function copyText(text, btn, okLabel) {
+            var done = function () {
+                var old = btn.textContent;
+                btn.textContent = okLabel || 'Copied!';
+                setTimeout(function () { btn.textContent = old; }, 2000);
+            };
+            var fallback = function () {
+                var ta = document.createElement('textarea');
+                ta.value = text;
+                document.body.appendChild(ta);
+                ta.select();
+                try { document.execCommand('copy'); done(); } catch (e) {}
+                document.body.removeChild(ta);
+            };
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(text).then(done, fallback);
+            } else {
+                fallback();
+            }
+        }
+
+        document.getElementById('copyEmail').addEventListener('click', function () {
+            copyText(document.getElementById('emailTemplate').textContent, this, 'Copied!');
+        });
+
+        document.getElementById('copyLink').addEventListener('click', function () {
+            copyText(window.location.href, this, 'Link copied!');
+        });
+    </script>
+</body>
+</html>
